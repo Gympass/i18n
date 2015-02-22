@@ -285,6 +285,13 @@ module I18n
       end
     end
 
+    # Raises an InvalidLocale exception when the passed country is not available.
+    def enforce_available_countries!(country)
+      if config.enforce_available_countries
+        raise I18n::InvalidLocale.new(country) if !country_available?(country)
+      end
+    end
+
   private
 
     # Any exceptions thrown in translate will be sent to the @@exception_handler
