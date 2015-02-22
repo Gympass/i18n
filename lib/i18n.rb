@@ -285,6 +285,12 @@ module I18n
       end
     end
 
+    # Returns true when the passed country, which can be either a String or a
+    # Symbol, is in the list of available countries. Returns false otherwise.
+    def country_available?(country)
+      I18n.config.available_countries_set.include?(country)
+    end    
+    
     # Raises an InvalidLocale exception when the passed country is not available.
     def enforce_available_countries!(country)
       if config.enforce_available_countries
