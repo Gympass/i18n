@@ -136,5 +136,66 @@ module I18n
     def enforce_available_locales=(enforce_available_locales)
       @@enforce_available_locales = enforce_available_locales
     end
+    
+    def country
+      @country ||= default_country
+    end
+
+    # Sets the current country pseudo-globally, i.e. in the Thread.current hash.
+    def country=(country)
+      I18n.enforce_available_countries!(country)
+      @country = country && country.to_sym
+    end
+
+    # Returns the current default country. Defaults to :'en'
+    def default_country
+      @@default_country ||= :us
+    end
+
+    # Sets the current default country. Used to set a custom default country.
+    def default_country=(country)
+      I18n.enforce_available_countries!(country)
+      @@default_country = country && country.to_sym
+    end
+
+    # Returns an array of countries for which translations are available.
+    # Unless you explicitely set these through I18n.available_countries=
+    # the call will be delegated to the backend.
+    def available_countries
+      @@available_countries ||= nil
+      @@available_countries || backend.available_countries
+    end
+
+    # Caches the available countries list as both strings and symbols in a Set, so
+    # that we can have faster lookups to do the available countries enforce check.
+    def available_countries_set #:nodoc:
+      @@available_countries_set ||= available_countries.inject(Set.new) do |set, country|
+        set << country.to_s << country.to_sym
+      end
+    end
+
+    # Sets the available countries.
+    def available_countries=(countries)
+      @@available_countries = Array(countries).map { |country| country.to_sym }
+      @@available_countries = nil if @@available_countries.empty?
+      @@available_countries_set = nil
+    end
+
+    # Clears the available countries set so it can be recomputed again after I18n
+    # gets reloaded.
+    def clear_available_countries_set #:nodoc:
+      @@available_countries_set = nil
+    end
+
+    # Whether or not to verify if countries are in the list of available countries.
+    # Defaults to true.
+    @@enforce_available_countries = true
+    def enforce_available_countries
+      @@enforce_available_countries
+    end
+
+    def enforce_available_countries=(enforce_available_countries)
+      @@enforce_available_countries = enforce_available_countries
+    end    
   end
 end

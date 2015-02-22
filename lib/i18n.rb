@@ -24,8 +24,8 @@ module I18n
     end
 
     # Write methods which delegates to the configuration object
-    %w(locale backend default_locale available_locales default_separator
-      exception_handler load_path enforce_available_locales).each do |method|
+    %w(locale country backend default_locale default_country available_locales available_countries default_separator
+      exception_handler load_path enforce_available_locales enforce_available_countries).each do |method|
       module_eval <<-DELEGATORS, __FILE__, __LINE__ + 1
         def #{method}
           config.#{method}
