@@ -231,13 +231,13 @@ module I18n
     # that we can have faster lookups to do the available sites enforce check.
     def available_sites_set #:nodoc:
       @@available_sites_set ||= available_sites.inject(Set.new) do |set, site|
-        set << site.to_s << site.to_sym
+        set << site.to_s << site.to_i
       end
     end
 
     # Sets the available sites.
     def available_sites=(sites)
-      @@available_sites = Array(sites).map { |site| site.to_sym }
+      @@available_sites = Array(sites).map { |site| site.to_i }
       @@available_sites = nil if @@available_sites.empty?
       @@available_sites_set = nil
     end
