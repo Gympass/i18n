@@ -24,8 +24,8 @@ module I18n
     end
 
     # Write methods which delegates to the configuration object
-    %w(locale country backend default_locale default_country available_locales available_countries default_separator
-      exception_handler load_path enforce_available_locales enforce_available_countries).each do |method|
+    %w(locale country site backend default_locale default_country default_site available_locales available_countries available_sites default_separator
+      exception_handler load_path enforce_available_locales enforce_available_countries enforce_available_sites).each do |method|
       module_eval <<-DELEGATORS, __FILE__, __LINE__ + 1
         def #{method}
           config.#{method}
@@ -297,6 +297,19 @@ module I18n
         raise I18n::InvalidLocale.new(country) if !country_available?(country)
       end
     end
+    
+    # Returns true when the passed site, which can be either a String or a
+    # Symbol, is in the list of available sites. Returns false otherwise.
+    def site_available?(site)
+      I18n.config.available_sites_set.include?(site)
+    end    
+    
+    # Raises an InvalidLocale exception when the passed site is not available.
+    def enforce_available_sites!(site)
+      if config.enforce_available_sites
+        raise I18n::InvalidLocale.new(site) if !site_available?(site)
+      end
+    end    
 
   private
 

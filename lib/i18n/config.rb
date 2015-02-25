@@ -196,6 +196,68 @@ module I18n
 
     def enforce_available_countries=(enforce_available_countries)
       @@enforce_available_countries = enforce_available_countries
-    end    
+    end
+    
+    def site
+      @site ||= default_site
+    end
+
+    # Sets the current site pseudo-globally, i.e. in the Thread.current hash.
+    def site=(site)
+      I18n.enforce_available_sites!(site)
+      @site = site && site.to_sym
+    end
+
+    # Returns the current default site. Defaults to :'en'
+    def default_site
+      @@default_site ||= :us
+    end
+
+    # Sets the current default site. Used to set a custom default site.
+    def default_site=(site)
+      I18n.enforce_available_sites!(site)
+      @@default_site = site && site.to_sym
+    end
+
+    # Returns an array of sites for which translations are available.
+    # Unless you explicitely set these through I18n.available_sites=
+    # the call will be delegated to the backend.
+    def available_sites
+      @@available_sites ||= nil
+      @@available_sites || backend.available_sites
+    end
+
+    # Caches the available sites list as both strings and symbols in a Set, so
+    # that we can have faster lookups to do the available sites enforce check.
+    def available_sites_set #:nodoc:
+      @@available_sites_set ||= available_sites.inject(Set.new) do |set, site|
+        set << site.to_s << site.to_sym
+      end
+    end
+
+    # Sets the available sites.
+    def available_sites=(sites)
+      @@available_sites = Array(sites).map { |site| site.to_sym }
+      @@available_sites = nil if @@available_sites.empty?
+      @@available_sites_set = nil
+    end
+
+    # Clears the available sites set so it can be recomputed again after I18n
+    # gets reloaded.
+    def clear_available_sites_set #:nodoc:
+      @@available_sites_set = nil
+    end
+
+    # Whether or not to verify if sites are in the list of available sites.
+    # Defaults to true.
+    @@enforce_available_sites = true
+    def enforce_available_sites
+      @@enforce_available_sites
+    end
+
+    def enforce_available_sites=(enforce_available_sites)
+      @@enforce_available_sites = enforce_available_sites
+    end      
+    
   end
 end
