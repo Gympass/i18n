@@ -205,18 +205,18 @@ module I18n
     # Sets the current site pseudo-globally, i.e. in the Thread.current hash.
     def site=(site)
       I18n.enforce_available_sites!(site)
-      @site = site && site.to_sym
+      @site = site && site.to_i
     end
 
     # Returns the current default site. Defaults to :'en'
     def default_site
-      @@default_site ||= :us
+      @@default_site ||= 1
     end
 
     # Sets the current default site. Used to set a custom default site.
     def default_site=(site)
       I18n.enforce_available_sites!(site)
-      @@default_site = site && site.to_sym
+      @@default_site = site && site.to_i
     end
 
     # Returns an array of sites for which translations are available.
