@@ -259,6 +259,28 @@ module I18n
       self.locale = current_locale if tmp_locale
     end
 
+    # Executes block with given I18n.site set.
+    def with_site(tmp_site = nil)
+      if tmp_site
+        current_site = self.site
+        self.site    = tmp_site
+      end
+      yield
+    ensure
+      self.site = current_site if tmp_site
+    end
+
+    # Executes block with given I18n.country set.
+    def with_country(tmp_country = nil)
+      if tmp_country
+        current_country = self.country
+        self.country    = tmp_country
+      end
+      yield
+    ensure
+      self.country = current_country if tmp_country
+    end
+
     # Merges the given locale, key and scope into a single array of keys.
     # Splits keys that contain dots into multiple keys. Makes sure all
     # keys are Symbols.
