@@ -258,6 +258,68 @@ module I18n
     def enforce_available_sites=(enforce_available_sites)
       @@enforce_available_sites = enforce_available_sites
     end      
+
+    def version
+      @version ||= default_version
+    end
+
+    # Sets the current version pseudo-globally, i.e. in the Thread.current hash.
+    def version=(version)
+      I18n.enforce_available_versions!(version)
+      @version = version && version.to_i
+    end
+
+    # Returns the current default version. Defaults to :'en'
+    def default_version
+      @@default_version ||= 1
+    end
+
+    # Sets the current default version. Used to set a custom default version.
+    def default_version=(version)
+      I18n.enforce_available_versions!(version)
+      @@default_version = version && version.to_i
+    end
+
+    # Returns an array of versions for which translations are available.
+    # Unless you explicitely set these through I18n.available_versions=
+    # the call will be delegated to the backend.
+    def available_versions
+      @@available_versions ||= nil
+      @@available_versions || backend.available_versions
+    end
+
+    # Caches the available versions list as both strings and symbols in a Set, so
+    # that we can have faster lookups to do the available versions enforce check.
+    def available_versions_set #:nodoc:
+      @@available_versions_set ||= available_versions.inject(Set.new) do |set, version|
+        set << version.to_s << version.to_i
+      end
+    end
+
+    # Sets the available versions.
+    def available_versions=(versions)
+      @@available_versions = Array(versions).map { |version| version.to_i }
+      @@available_versions = nil if @@available_versions.empty?
+      @@available_versions_set = nil
+    end
+
+    # Clears the available versions set so it can be recomputed again after I18n
+    # gets reloaded.
+    def clear_available_versions_set #:nodoc:
+      @@available_versions_set = nil
+    end
+
+    # Whether or not to verify if versions are in the list of available versions.
+    # Defaults to true.
+    @@enforce_available_versions = true
+    def enforce_available_versions
+      @@enforce_available_versions
+    end
+
+    def enforce_available_versions=(enforce_available_versions)
+      @@enforce_available_versions = enforce_available_versions
+    end      
+    
     
   end
 end

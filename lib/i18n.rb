@@ -24,8 +24,8 @@ module I18n
     end
 
     # Write methods which delegates to the configuration object
-    %w(locale country site backend default_locale default_country default_site available_locales available_countries available_sites default_separator
-      exception_handler load_path enforce_available_locales enforce_available_countries enforce_available_sites).each do |method|
+    %w(locale country site version backend default_locale default_country default_site default_version available_locales available_countries available_sites available_versions default_separator
+      exception_handler load_path enforce_available_locales enforce_available_countries enforce_available_sites enforce_available_versions).each do |method|
       module_eval <<-DELEGATORS, __FILE__, __LINE__ + 1
         def #{method}
           config.#{method}
@@ -259,6 +259,17 @@ module I18n
       self.locale = current_locale if tmp_locale
     end
 
+    # Executes block with given I18n.country set.
+    def with_country(tmp_country = nil)
+      if tmp_country
+        current_country = self.country
+        self.country    = tmp_country
+      end
+      yield
+    ensure
+      self.country = current_country if tmp_country
+    end
+
     # Executes block with given I18n.site set.
     def with_site(tmp_site = nil)
       if tmp_site
@@ -270,15 +281,15 @@ module I18n
       self.site = current_site if tmp_site
     end
 
-    # Executes block with given I18n.country set.
-    def with_country(tmp_country = nil)
-      if tmp_country
-        current_country = self.country
-        self.country    = tmp_country
+    # Executes block with given I18n.version set.
+    def with_version(tmp_version = nil)
+      if tmp_version
+        current_version = self.version
+        self.version    = tmp_version
       end
       yield
     ensure
-      self.country = current_country if tmp_country
+      self.version = current_version if tmp_version
     end
 
     # Merges the given locale, key and scope into a single array of keys.
@@ -333,6 +344,19 @@ module I18n
       end
     end    
 
+    # Returns true when the passed version, which can be either a String or a
+    # Symbol, is in the list of available versions. Returns false otherwise.
+    def version_available?(version)
+      I18n.config.available_versions_set.include?(version)
+    end    
+    
+    # Raises an InvalidLocale exception when the passed version is not available.
+    def enforce_available_versions!(version)
+      if config.enforce_available_versions
+        raise I18n::InvalidLocale.new(version) if !version_available?(version)
+      end
+    end    
+    
   private
 
     # Any exceptions thrown in translate will be sent to the @@exception_handler
