@@ -24,8 +24,8 @@ module I18n
     end
 
     # Write methods which delegates to the configuration object
-    %w(locale country site version backend default_locale default_country default_site default_version available_locales available_countries available_sites available_versions default_separator
-      exception_handler load_path enforce_available_locales enforce_available_countries enforce_available_sites enforce_available_versions).each do |method|
+    %w(locale country site bu version backend default_locale default_country default_site default_bu default_version available_locales available_countries available_sites available_bus available_versions default_separator
+      exception_handler load_path enforce_available_locales enforce_available_countries enforce_available_sites enforce_available_bus enforce_available_versions).each do |method|
       module_eval <<-DELEGATORS, __FILE__, __LINE__ + 1
         def #{method}
           config.#{method}
@@ -281,6 +281,17 @@ module I18n
       self.site = current_site if tmp_site
     end
 
+    # Executes block with given I18n.bu set.
+    def with_bu(tmp_bu = nil)
+      if tmp_bu
+        current_bu = self.bu
+        self.bu    = tmp_bu
+      end
+      yield
+    ensure
+      self.bu = current_bu if tmp_bu
+    end
+
     # Executes block with given I18n.version set.
     def with_version(tmp_version = nil)
       if tmp_version
@@ -344,6 +355,19 @@ module I18n
       end
     end    
 
+    # Returns true when the passed bu, which can be either a String or a
+    # Symbol, is in the list of available bus. Returns false otherwise.
+    def bu_available?(bu)
+      I18n.config.available_bus_set.include?(bu)
+    end    
+    
+    # Raises an InvalidLocale exception when the passed bu is not available.
+    def enforce_available_bus!(bu)
+      if config.enforce_available_bus
+        raise I18n::InvalidLocale.new(bu) if !bu_available?(bu)
+      end
+    end
+    
     # Returns true when the passed version, which can be either a String or a
     # Symbol, is in the list of available versions. Returns false otherwise.
     def version_available?(version)

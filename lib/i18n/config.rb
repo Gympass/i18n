@@ -259,6 +259,67 @@ module I18n
       @@enforce_available_sites = enforce_available_sites
     end      
 
+    def bu
+      @bu ||= default_bu
+    end
+
+    # Sets the current bu pseudo-globally, i.e. in the Thread.current hash.
+    def bu=(bu)
+      I18n.enforce_available_bus!(bu)
+      @bu = bu && bu.to_i
+    end
+
+    # Returns the current default bu. Defaults to :'en'
+    def default_bu
+      @@default_bu ||= 1
+    end
+
+    # Sets the current default bu. Used to set a custom default bu.
+    def default_bu=(bu)
+      I18n.enforce_available_bus!(bu)
+      @@default_bu = bu && bu.to_i
+    end
+
+    # Returns an array of bus for which translations are available.
+    # Unless you explicitely set these through I18n.available_bus=
+    # the call will be delegated to the backend.
+    def available_bus
+      @@available_bus ||= nil
+      @@available_bus || backend.available_bus
+    end
+
+    # Caches the available bus list as both strings and symbols in a Set, so
+    # that we can have faster lookups to do the available bus enforce check.
+    def available_bus_set #:nodoc:
+      @@available_bus_set ||= available_bus.inject(Set.new) do |set, bu|
+        set << bu.to_s << bu.to_i
+      end
+    end
+
+    # Sets the available bus.
+    def available_bus=(bus)
+      @@available_bus = Array(bus).map { |bu| bu.to_i }
+      @@available_bus = nil if @@available_bus.empty?
+      @@available_bus_set = nil
+    end
+
+    # Clears the available bus set so it can be recomputed again after I18n
+    # gets reloaded.
+    def clear_available_bus_set #:nodoc:
+      @@available_bus_set = nil
+    end
+
+    # Whether or not to verify if bus are in the list of available bus.
+    # Defaults to true.
+    @@enforce_available_bus = true
+    def enforce_available_bus
+      @@enforce_available_bus
+    end
+
+    def enforce_available_bus=(enforce_available_bus)
+      @@enforce_available_bus = enforce_available_bus
+    end      
+    
     def version
       @version ||= default_version
     end
