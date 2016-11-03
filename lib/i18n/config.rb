@@ -271,7 +271,7 @@ module I18n
 
     # Returns the current default bu. Defaults to :'en'
     def default_bu
-      @@default_bu ||= 1
+      @@default_bu ||= 0
     end
 
     # Sets the current default bu. Used to set a custom default bu.
