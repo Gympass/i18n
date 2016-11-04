@@ -201,6 +201,10 @@ module I18n
     def site
       @site ||= default_site
     end
+    
+    def bu_site
+      site == 1 ? bu : site
+    end
 
     # Sets the current site pseudo-globally, i.e. in the Thread.current hash.
     def site=(site)
